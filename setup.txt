@@ -1,0 +1,15 @@
+1st Steps:- 
+install pytrhon version
+install and configure fast api
+setup Virtual Environment
+select the Virtual Environment from Command palette of venv>scripts>python.exe
+h:/Codes/FastAPI/venv/Scripts/Activate.ps1 for run venv (venv)
+if its not showing switch paython to pre release
+
+for fastapi:
+pip install[all] // it will install all fastapi
+pip freeze // for checking package which installed
+uvicorn app.main:app --reload // for running the live server
+
+for installing driver to connect database:
+pip install psycopg2
