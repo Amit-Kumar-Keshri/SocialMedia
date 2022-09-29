@@ -28,7 +28,7 @@ while True:
     except Exception as error:
         print("Connecting to database failed!")
         print("Error: ", error)
-        time.sleep(2)
+        time.sleep(2) # added 2 sec dealy for reconnecting database
 
 
 my_posts = [{"title": "title of post1", "content": "content of post 1", "id": 1}, {
