@@ -13,3 +13,11 @@ uvicorn app.main:app --reload // for running the live server
 
 for installing driver to connect database:
 pip install psycopg2
+import psycopg2 // to connect the database to API
+
+
+for git commit :-
+git checkout
+git add .
+git commit -m "comment"
+git push dev
