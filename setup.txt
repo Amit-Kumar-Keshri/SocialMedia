@@ -21,3 +21,7 @@ git checkout
 git add .
 git commit -m "comment"
 git push dev
+
+for ORM :- 
+first install pip install sqlalchemy
+and it needed database driver like psycopg2
