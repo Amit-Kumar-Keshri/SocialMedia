@@ -93,11 +93,11 @@ def get_post(id: int):
 def delete_post(id: int):
     
     cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING * """, (str(id),))
-    delete_post = cursor.fetchone()
+    deleted_post = cursor.fetchone()
     # index = find_post(id)
     conn.commit()
     
-    if delete_post == None:
+    if deleted_post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"post with id: {id} does not exist")
 
@@ -113,7 +113,7 @@ def update_post(id: int, post: Post):
     conn.commit()
         
     # index = find_post(id)
-    if update_post == None:
+    if updated_post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"post with id: {id} does not exist")
 
