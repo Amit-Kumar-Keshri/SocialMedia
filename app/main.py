@@ -1,16 +1,21 @@
 from multiprocessing import synchronize
 from turtle import pos, title
-from typing import Optional
+from typing import List, Optional
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
+
 from random import randrange # for generrating random number
 import psycopg2
 from psycopg2.extras import RealDictCursor  # for returning data as column & row wise data 
 import time  # for adding a delay to database reconnecting
 from sqlalchemy.orm import Session
-from . import models, schemas
+from . import models, schemas, utils
 from .database import engine, get_db
+
+
+
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -54,8 +59,7 @@ async def root():
     return {"data": "hello world"}
 
 
-
-@app.get("/post")
+@app.get("/post", response_model=List[schemas.Post])
 def get_post(db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * FROM posts""") # for executing the view query
     # # cursor.execute("INSERT INTO posts (title, content) VALUES (%s, %s)")
@@ -64,7 +68,7 @@ def get_post(db: Session = Depends(get_db)):
     return  posts
 
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 async def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """,
     #                (post.title, post.content, post.published)) # for taking input from user in postman or site
@@ -82,7 +86,7 @@ async def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     return new_post
 
 
-@app.get("/posts/{id}")
+@app.get("/posts/{id}", response_model=schemas.Post)
 def get_post(id: int, db: Session = Depends(get_db)):
     # cursor.execute(""" SELECT * FROM posts  WHERE id = %s  """, (str(id)))  # if not work put comma after str typecasting
     # post = cursor.fetchone()
@@ -117,7 +121,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@app.put("/posts/{id}")
+@app.put("/posts/{id}", response_model=schemas.Post)
 def update_post(id: int, post: schemas.PostBase , db: Session = Depends(get_db)):
     
     # cursor.execute(""" UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""", (post.title, post.content, post.published, str(id)))
@@ -138,3 +142,28 @@ def update_post(id: int, post: schemas.PostBase , db: Session = Depends(get_db))
     # post_dict["id"] = id
     # my_posts[index] = post_dict
     return  post_query.first()
+
+
+#for users
+@app.post("/users",status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
+def create_user(user:schemas.UserCreate, db: Session = Depends(get_db)):
+    
+    #hash the password - user.password
+    hashed_password = utils.hash(user.password)
+    user.password = hashed_password
+    
+    new_user = models.User(**user.dict())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
+
+
+@app.get("/user/{id}")
+def get_user(id: int, db: Session =Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"user with the id : {id} was not found")
+    print(user)
+    return user

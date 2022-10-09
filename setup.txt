@@ -25,3 +25,7 @@ git push dev
 for ORM :- 
 first install pip install sqlalchemy
 and it needed database driver like psycopg2
+
+for security Oauth:- 
+pip install passlib[bcrypt] // to install passlib & bcrypt
+and imported from passlib.context import CryptContext in utils.py file
