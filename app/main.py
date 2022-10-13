@@ -1,16 +1,20 @@
-from multiprocessing import synchronize
-from turtle import pos, title
-from typing import Optional
-from fastapi import FastAPI, Response, status, HTTPException, Depends
-from fastapi.params import Body
-from pydantic import BaseModel
-from random import randrange # for generrating random number
-import psycopg2
-from psycopg2.extras import RealDictCursor  # for returning data as column & row wise data 
 import time  # for adding a delay to database reconnecting
+from multiprocessing import synchronize
+from random import randrange  # for generrating random number
+from turtle import pos, title
+from typing import List, Optional
+
+import psycopg2
+from fastapi import Depends, FastAPI, HTTPException, Response, status
+from fastapi.params import Body
+from psycopg2.extras import \
+    RealDictCursor  # for returning data as column & row wise data
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from . import models, schemas
+
+from . import models, schemas, utils
 from .database import engine, get_db
+from .routers import auth, post, user
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -49,92 +53,15 @@ def find_post(id):
             return i
 
 
+app.include_router(post.router)
+app.include_router(user.router)
+app.include_router(auth.router)
+
+
 @app.get("/")
 async def root():
     return {"data": "hello world"}
 
 
 
-@app.get("/post")
-def get_post(db: Session = Depends(get_db)):
-    # cursor.execute("""SELECT * FROM posts""") # for executing the view query
-    # # cursor.execute("INSERT INTO posts (title, content) VALUES (%s, %s)")
-    # posts = cursor.fetchall() # for fetch data of all column & row from database
-    posts = db.query(models.Post).all()
-    return  posts
 
-
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
-async def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
-    # cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """,
-    #                (post.title, post.content, post.published)) # for taking input from user in postman or site
-    # # post_dict = post.dict() // 1st hardcoded
-    # # post_dict ['id'] = randrange(0,1000000)
-    # # my_posts.append(post_dict)
-    # new_post = cursor.fetchone() # for fetch data of one column from database
-    # conn.commit() # for pushing data to database
-    
-    # new_post = models.Post(title=post.title,content = post.content, published = post.published)
-    new_post = models.Post(**post.dict())
-    db.add(new_post)
-    db.commit()
-    db.refresh(new_post)
-    return new_post
-
-
-@app.get("/posts/{id}")
-def get_post(id: int, db: Session = Depends(get_db)):
-    # cursor.execute(""" SELECT * FROM posts  WHERE id = %s  """, (str(id)))  # if not work put comma after str typecasting
-    # post = cursor.fetchone()
-    
-    post = db.query(models.Post).filter(models.Post.id == id).first()
-    if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"post with id: {id} was not found")
-        # response.status_code = status.HTTP_404_NOT_FOUND // 1st hardcoded
-        # return {"message": f"post with id: {id} was not found"}
-    return post
-
-
-@app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id: int, db: Session = Depends(get_db)):
-    
-    # cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING * """, (str(id),))
-    # deleted_post = cursor.fetchone()
-    # # index = find_post(id) // 1st hardcoded
-    # conn.commit()
-    
-    post = db.query(models.Post).filter(models.Post.id == id)
-    
-    
-    if post.first() == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"post with id: {id} does not exist")
-
-    post.delete(synchronize_session= False)
-    db.commit()
-    
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-@app.put("/posts/{id}")
-def update_post(id: int, post: schemas.PostBase , db: Session = Depends(get_db)):
-    
-    # cursor.execute(""" UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""", (post.title, post.content, post.published, str(id)))
-    # updated_post = cursor.fetchone()
-    # conn.commit()
-    
-    post_query = db.query(models.Post).filter(models.Post.id==id)
-        
-    # index = find_post(id) // 1st hardcoded
-    if post_query.first() == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"post with id: {id} does not exist")
-        
-    post_query.update(post.dict(), synchronize_session=False)
-    db.commit()
-
-    # post_dict = post.dict()// 1st hardcoded
-    # post_dict["id"] = id
-    # my_posts[index] = post_dict
-    return  post_query.first()
