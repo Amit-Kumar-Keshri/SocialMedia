@@ -29,3 +29,7 @@ and it needed database driver like psycopg2
 for security Oauth:- 
 pip install passlib[bcrypt] // to install passlib & bcrypt
 and imported from passlib.context import CryptContext in utils.py file
+
+for JWT Token authentication:-
+for creating tokens we have to install -> pip install "python-jose[cryptography]"
+for that we have to make Oaut.py for JWT error -> from jose import JwtError, jwt
