@@ -6,6 +6,7 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from . import database, models, schemas
+from .config import settings
 
 oauth_scheme = OAuth2PasswordBearer(tokenUrl= 'login')
 
@@ -13,15 +14,15 @@ oauth_scheme = OAuth2PasswordBearer(tokenUrl= 'login')
 # algo 
 # Expriation time
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 
 
 # creating jwt tokens
 def create_access_token(data: dict):
-    to_encode = data.copy() # to manipulkate data i had made a copy of data so that data will not manipulate into the database
+    to_encode = data.copy() # to manipulate data i had made a copy of data so that data will not manipulate into the database
     
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})  # this is Expriation time which we pass to jwt that after how time it get expire
@@ -34,9 +35,9 @@ def create_access_token(data: dict):
 def verify_access_token(token: str, credentials_exception):
 
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM]) # payload consists of of tokens, SECRET_KEY, alogorithm
 
-        id: str = payload.get("user_id")
+        id: str = payload.get("user_id") # extracting id from token
         if id is None:
             raise credentials_exception
         token_data = schemas.TokenData(id=id)
