@@ -1,6 +1,7 @@
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.sql.expression import null, text
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 
 from .database import Base
@@ -17,6 +18,8 @@ class Post(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable = False, server_default=text('now()'))
     owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable= False)
     
+    owner = relationship("User") # this code does is fetch the user data from User class 
+
 # creating some database models of users    
 class User(Base):
     __tablename__ = "users"
@@ -26,3 +29,12 @@ class User(Base):
     password = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable = False, server_default=text('now()'))
     
+    
+# creating some database models of votes
+class Vote(Base):
+    __tablename__ = "votes"
+    
+    post_id = Column(Integer,  ForeignKey(
+        "posts.id", ondelete="CASCADE"), primary_key=True)
+    user_id = Column(Integer,  ForeignKey(
+        "users.id", ondelete="CASCADE"), primary_key=True)

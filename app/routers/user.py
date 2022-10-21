@@ -7,11 +7,13 @@ from .. import models, schemas, utils
 from ..database import get_db
 
 router = APIRouter(
-    prefix="/users", # for url i have done common starting url
-    tags=['users'] #for making groups in fastapi docuumentation
+    prefix="/users",  # for url i have done common starting url
+    tags=['users']  # for making groups in fastapi docuumentation
 )
 
 #for users
+
+
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
@@ -32,5 +34,5 @@ def get_user(id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"user with the id : {id} was not found")
-    print(user)
+
     return user

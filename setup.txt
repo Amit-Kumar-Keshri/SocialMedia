@@ -26,10 +26,22 @@ for ORM :-
 first install pip install sqlalchemy
 and it needed database driver like psycopg2
 
-for security Oauth:- 
+for security Oauth2:- 
 pip install passlib[bcrypt] // to install passlib & bcrypt
 and imported from passlib.context import CryptContext in utils.py file
 
 for JWT Token authentication:-
 for creating tokens we have to install -> pip install "python-jose[cryptography]"
 for that we have to make Oaut.py for JWT error -> from jose import JwtError, jwt
+
+
+for database migration we ccan use alembic:- 
+pip install alembic
+then init > "alembic init <alembic as name>"
+and then import the Base from app.models import Base in "env.py" file in alembic file and use in metadata = Base
+and then go to alembic.ini(its not required ) better connect in env.py file connect the database in sqlalchemy url as connected in database.py file like postgresql+driver name:// 
+
+
+for package requirement:-
+for making requirement file - "pip freeze > requirements.txt"
+for package install from requirements file - "pip install -r requirements.txt"
