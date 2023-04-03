@@ -47,9 +47,7 @@ class UserCreate(BaseModel):
     password: str
     
 
-
-
-        
+ 
 # users loging data
 class UserLogin(BaseModel):
     email: EmailStr
